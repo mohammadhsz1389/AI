@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>هوش مصنوعی پژوهشی</title>
+    <style>
+        :root {
+            --bg-color: #f5f5f5;
+            --text-color: #333;
+            --primary-color: #6e48aa;
+            --secondary-color: #9d50bb;
+            --chat-bg: #ffffff;
+            --user-bubble: #e3f2fd;
+            --ai-bubble: #f1f1f1;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --primary-color: #bb86fc;
+            --secondary-color: #3700b3;
+            --chat-bg: #1e1e1e;
+            --user-bubble: #3700b3;
+            --ai-bubble: #2d2d2d;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--primary-color);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .mode-toggle {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background 0.3s;
+        }
+
+        .mode-toggle:hover {
+            background: var(--secondary-color);
+        }
+
+        .chat-container {
+            flex: 1;
+            background-color: var(--chat-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px var(--shadow);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-message {
+            align-items: flex-end;
+        }
+
+        .ai-message {
+            align-items: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            margin-bottom: 5px;
+            word-wrap: break-word;
+        }
+
+        .user-bubble {
+            background-color: var(--user-bubble);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .ai-bubble {
+            background-color: var(--ai-bubble);
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--ai-bubble);
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--ai-bubble);
+            border-radius: 20px;
+            background-color: var(--chat-bg);
+            color: var(--text-color);
+            font-size: 16px;
+        }
+
+        #send-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        #send-button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 10px 15px;
+            background-color: var(--ai-bubble);
+            border-radius: 18px;
+            margin-bottom: 15px;
+            width: fit-content;
+            border-bottom-left-radius: 5px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--text-color);
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: typingAnimation 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingAnimation {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+            30% {
+                transform: translateY(-5px);
+                opacity: 1;
+            }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid var(--primary-color);
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .message-bubble {
+                max-width: 85%;
+            }
+        }
+
+        .result-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .result-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>هوش مصنوعی پژوهشی</h1>
+            <button class="mode-toggle" id="mode-toggle">
+                <span>حالت تاریک</span>
+            </button>
+        </header>
+
+        <div class="chat-container">
+            <div class="chat-messages" id="chat-messages">
+                <div class="message ai-message">
+                    <div class="message-bubble ai-bubble">
+                        سلام! من یک هوش مصنوعی پژوهشی هستم که می‌توانم اطلاعات را از ویکی‌پدیا و سایت‌های معتبر برای شما جستجو کنم. چگونه می‌توانم کمک کنم؟
+                    </div>
+                    <div class="message-time">همین الان</div>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typing-indicator">
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <input type="text" id="user-input" placeholder="سوال خود را بپرسید..." autocomplete="off">
+                <button id="send-button">ارسال</button>
+            </div>
+        </div>
+
+        <footer>
+            توسعه داده شده توسط محمد حسین
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatMessages = document.getElementById('chat-messages');
+            const userInput = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
+            const modeToggle = document.getElementById('mode-toggle');
+            const typingIndicator = document.getElementById('typing-indicator');
+            
+            // Check for saved dark mode preference
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+                modeToggle.innerHTML = '<span>حالت روشن</span>';
+            }
+
+            // Toggle dark/light mode
+            modeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                
+                if (document.body.classList.contains('dark-mode')) {
+                    localStorage.setItem('darkMode', 'enabled');
+                    modeToggle.innerHTML = '<span>حالت روشن</span>';
+                } else {
+                    localStorage.setItem('darkMode', 'disabled');
+                    modeToggle.innerHTML = '<span>حالت تاریک</span>';
+                }
+            });
+
+            // Send message when button is clicked or Enter is pressed
+            sendButton.addEventListener('click', sendMessage);
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            async function sendMessage() {
+                const message = userInput.value.trim();
+                if (message === '') return;
+                
+                // Add user message to chat
+                addMessage(message, 'user');
+                userInput.value = '';
+                
+                // Show typing indicator
+                typingIndicator.style.display = 'block';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                try {
+                    // Get AI response
+                    const aiResponse = await getAIResponse(message);
+                    typingIndicator.style.display = 'none';
+                    addMessage(aiResponse, 'ai');
+                } catch (error) {
+                    typingIndicator.style.display = 'none';
+                    addMessage('متاسفانه در دریافت اطلاعات مشکلی پیش آمد. لطفاً دوباره تلاش کنید.', 'ai');
+                    console.error('Error:', error);
+                }
+                
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            function addMessage(text, sender) {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+                
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}-message`;
+                
+                const bubbleDiv = document.createElement('div');
+                bubbleDiv.className = `message-bubble ${sender}-bubble`;
+                
+                // Check if text contains HTML tags
+                if (/<[a-z][\s\S]*>/i.test(text)) {
+                    bubbleDiv.innerHTML = text;
+                } else {
+                    bubbleDiv.textContent = text;
+                }
+                
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'message-time';
+                timeDiv.textContent = timeString;
+                
+                messageDiv.appendChild(bubbleDiv);
+                messageDiv.appendChild(timeDiv);
+                
+                chatMessages.appendChild(messageDiv);
+            }
+
+            async function getAIResponse(message) {
+                // Convert message to lowercase for easier matching
+                const lowerMessage = message.toLowerCase();
+                
+                // Greetings
+                if (lowerMessage.includes('سلام') || 
+                    lowerMessage.includes('hello') || 
+                    lowerMessage.includes('hi')) {
+                    return 'سلام! چطور می‌تونم بهت کمک کنم؟';
+                }
+                
+                // How are you
+                if (lowerMessage.includes('خوبی') || 
+                    lowerMessage.includes('حالت خوبه') || 
+                    lowerMessage.includes('چطوری')) {
+                    return 'من خوبم ممنون! شما چطورید؟';
+                }
+                
+                // Creator questions
+                if (lowerMessage.includes('سازنده تو کیه') || 
+                    lowerMessage.includes('سازنده تو کیست') || 
+                    lowerMessage.includes('چه کسی تو را ساخته') || 
+                    lowerMessage.includes('خالق تو کیست')) {
+                    return 'سازنده من محمد حسین است';
+                }
+                
+                // Gold price
+                if (lowerMessage.includes('قیمت طلا') || 
+                    lowerMessage.includes('نرخ طلا') || 
+                    lowerMessage.includes('قیمت سکه') || 
+                    lowerMessage.includes('نرخ ارز')) {
+                    return `برای مشاهده قیمت‌های به‌روز طلا، سکه و ارز می‌توانید به سایت <a href="https://www.tgju.org" class="result-link" target="_blank">tgju.org</a> مراجعه کنید.`;
+                }
+                
+                // For educational questions
+                if (lowerMessage.includes('آموزش') || 
+                    lowerMessage.includes('یادگیری') || 
+                    lowerMessage.includes('چگونه') || 
+                    lowerMessage.includes('روش')) {
+                    return `برای یادگیری موضوع "${message}" می‌توانید از منابع آموزشی معتبر مانند:<br>
+                    - <a href="https://fa.wikipedia.org/wiki/${encodeURIComponent(message)}" class="result-link" target="_blank">ویکی‌پدیای فارسی</a><br>
+                    - <a href="https://maktabkhooneh.org" class="result-link" target="_blank">مکتب‌خونه</a><br>
+                    - <a href="https://faradars.org" class="result-link" target="_blank">فرادرس</a><br>
+                    استفاده کنید.`;
+                }
+                
+                // For Wikipedia queries
+                try {
+                    const wikiResult = await searchWikipedia(message);
+                    if (wikiResult) {
+                        return `بر اساس اطلاعات ویکی‌پدیا:<br><strong>${wikiResult.title}</strong><br>
+                        ${wikiResult.extract}<br>
+                        <a href="${wikiResult.url}" class="result-link" target="_blank">مشاهده کامل مطلب در ویکی‌پدیا</a>`;
+                    }
+                } catch (error) {
+                    console.error('Wikipedia search error:', error);
+                }
+                
+                // Default response
+                return `برای اطلاعات درباره "${message}" می‌توانید این منابع را بررسی کنید:<br>
+                - <a href="https://fa.wikipedia.org/wiki/${encodeURIComponent(message)}" class="result-link" target="_blank">ویکی‌پدیای فارسی</a><br>
+                - <a href="https://www.tgju.org" class="result-link" target="_blank">سایت قیمت‌های به‌روز (tgju.org)</a><br>
+                - <a href="https://www.google.com/search?q=${encodeURIComponent(message)}" class="result-link" target="_blank">جستجوی گوگل</a>`;
+            }
+
+            async function searchWikipedia(query) {
+                // Search Persian Wikipedia
+                const url = `https://fa.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=extracts|info&exintro&explaintext&inprop=url&redirects=1&titles=${encodeURIComponent(query)}`;
+                
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Wikipedia search failed');
+                }
+                
+                const data = await response.json();
+                const pages = data.query.pages;
+                const pageId = Object.keys(pages)[0];
+                
+                if (pageId === "-1") {
+                    return null; // No results found
+                }
+                
+                return {
+                    title: pages[pageId].title,
+                    extract: pages[pageId].extract ? pages[pageId].extract.substring(0, 300) + '...' : 'توضیحی موجود نیست',
+                    url: pages[pageId].fullurl
+                };
+            }
+        });
+    </script>
+</body>
+</html>
